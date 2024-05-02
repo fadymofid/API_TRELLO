@@ -11,9 +11,13 @@ import javax.transaction.Transactional;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import Entities.User;
+import Entities.Board;
+import Entities.Role;
+
+import java.util.List;
 
 @Stateful
-@Path("/service")
+@Path("/Uservice")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class UserService {
@@ -135,8 +139,89 @@ public class UserService {
 
     
     
-    
-    
+//    @POST
+//    @Path("/boards/{username}/{boardName}")
+//    @Transactional
+//    public Response createBoard(@PathParam("username") String username, @PathParam("boardName") String boardName) {
+//        try {
+//            // Check if the user is a TeamLeader
+//            User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+//                                     .setParameter("username", username)
+//                                     .getSingleResult();
+//            if (user.getRole() != Role.TEAM_LEADER) {
+//                return Response.status(Response.Status.UNAUTHORIZED).entity("Only TeamLeader can create boards").build();
+//            }
+//
+//            // Create and save the board entity
+//            Board board = new Board();
+//            board.setName(boardName);
+//            board.setTeamLeader(user);
+//            entityManager.persist(board);
+//
+//            return Response.status(Response.Status.OK).entity(board).build();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Failed to create board").build();
+//        }
+//    }
+//    
+//    
+//    
+//    @DELETE
+//    @Path("/D_boards/{username}/{boardName}")
+//    @Transactional
+//    public Response deleteBoard(@PathParam("boardName") String boardName, @PathParam("username") String username) {
+//        try {
+//            // Check if the user is a TeamLeader
+//            User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+//                                     .setParameter("username", username)
+//                                     .getSingleResult();
+//            if (user.getRole() != Role.TEAM_LEADER) {
+//                return Response.status(Response.Status.UNAUTHORIZED).entity("Only TeamLeader can delete boards").build();
+//            }
+//
+//            // Find the board by name
+//            Board board = entityManager.createQuery("SELECT b FROM Board b WHERE b.name = :boardName", Board.class)
+//                                      .setParameter("boardName", boardName)
+//                                      .getSingleResult();
+//            if (board == null) {
+//                return Response.status(Response.Status.NOT_FOUND).entity("Board not found").build();
+//            }
+//
+//            entityManager.remove(board);
+//
+//            return Response.status(Response.Status.OK).entity("Board deleted successfully").build();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Failed to delete board").build();
+//        }
+//    }
+//    
+//    
+//    
+//    
+//    @GET
+//    @Path("/List_Boards/{username}")
+//    public Response listBoards(@PathParam("username") String username ) {
+//        try {
+//            User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+//                                     .setParameter("username", username)
+//                                     .getSingleResult();
+//
+//            List<Board> boards = entityManager.createQuery("SELECT b FROM Board b WHERE b.teamLeader :user", Board.class)
+//                                              .setParameter("user", user)
+//                                              .getResultList();
+//
+//            return Response.status(Response.Status.OK).entity(boards).build();
+//        } catch (NoResultException e) {
+//            return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Failed to list boards").build();
+//        }
+//    }
+//
+//    
     
     
    
