@@ -1,4 +1,7 @@
 package Entities;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.*;
 import Entities.Role;
 @Entity
@@ -22,7 +25,8 @@ public class User {
     @Column(nullable = false)
     private Role role;
    
-  
+    @ManyToMany(mappedBy = "collaborators")
+    private List<Board> collaboratedBoards = new ArrayList<>();
   
    
     // Constructors, getters, and setters

@@ -1,6 +1,6 @@
 package Service;
 
-import Service.DTO;
+
 import javax.ejb.Stateful;
 import javax.ws.rs.*;
 import javax.persistence.EntityManager;
@@ -37,11 +37,11 @@ public class UserService {
     @POST
     @Path("/register")
     @Transactional
-    public Response registerUser(DTO userDTO) {
+    public Response registerUser(User user) {
         try {
             // Check if username or email already exists
             long countByUsername = entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.username = :username", Long.class)
-                                                .setParameter("username", userDTO.getUsername())
+                                                .setParameter("username", user.getUsername())
                                                 .getSingleResult();
 
             if (countByUsername > 0) {
@@ -49,7 +49,7 @@ public class UserService {
             }
 
             long countByEmail = entityManager.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :email", Long.class)
-                                             .setParameter("email", userDTO.getEmail())
+                                             .setParameter("email", user.getEmail())
                                              .getSingleResult();
 
             if (countByEmail > 0) {
@@ -57,11 +57,7 @@ public class UserService {
             }
 
             // Create and save the user entity
-            User user = new User();
-            user.setUsername(userDTO.getUsername());
-            user.setEmail(userDTO.getEmail());
-            user.setPassword(userDTO.getPassword());
-            user.setRole(userDTO.getRole());
+            
             entityManager.persist(user);
 
             return Response.status(Response.Status.OK).entity(user).build();
@@ -99,34 +95,34 @@ public class UserService {
     
     @PUT
     @Path("/profile/{username}")
-    public Response updateProfile(@PathParam("username") String username, DTO profileUpdateDTO) {
+    public Response updateProfile(@PathParam("username") String username, User profileUpdate) {
         try {
             // Retrieve the user from the database
             TypedQuery<User> query = entityManager.createQuery(
                 "SELECT u FROM User u WHERE u.username = :username", User.class);
             query.setParameter("username", username);
-            
+
             User user = query.getSingleResult();
-            
+
             // Check if the user exists
             if (user == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity("User not found.").build();
             }
-            
+
             // Update the user's profile information
-            if (profileUpdateDTO.getUsername() != null && !profileUpdateDTO.getUsername().isEmpty()) {
-                user.setUsername(profileUpdateDTO.getUsername());
+            if (profileUpdate.getUsername() != null && !profileUpdate.getUsername().isEmpty()) {
+                user.setUsername(profileUpdate.getUsername());
             }
-            if (profileUpdateDTO.getEmail() != null && !profileUpdateDTO.getEmail().isEmpty()) {
-                user.setEmail(profileUpdateDTO.getEmail());
+            if (profileUpdate.getEmail() != null && !profileUpdate.getEmail().isEmpty()) {
+                user.setEmail(profileUpdate.getEmail());
             }
-            if (profileUpdateDTO.getPassword() != null && !profileUpdateDTO.getPassword().isEmpty()) {
-                user.setPassword(profileUpdateDTO.getPassword());
+            if (profileUpdate.getPassword() != null && !profileUpdate.getPassword().isEmpty()) {
+                user.setPassword(profileUpdate.getPassword());
             }
-            
+
             // Persist the updated user entity
             entityManager.merge(user);
-            
+
             return Response.status(Response.Status.OK).entity("Profile updated successfully.").build();
         } catch (NoResultException e) {
             return Response.status(Response.Status.NOT_FOUND).entity("User not found.").build();
@@ -139,89 +135,7 @@ public class UserService {
 
     
     
-//    @POST
-//    @Path("/boards/{username}/{boardName}")
-//    @Transactional
-//    public Response createBoard(@PathParam("username") String username, @PathParam("boardName") String boardName) {
-//        try {
-//            // Check if the user is a TeamLeader
-//            User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
-//                                     .setParameter("username", username)
-//                                     .getSingleResult();
-//            if (user.getRole() != Role.TEAM_LEADER) {
-//                return Response.status(Response.Status.UNAUTHORIZED).entity("Only TeamLeader can create boards").build();
-//            }
-//
-//            // Create and save the board entity
-//            Board board = new Board();
-//            board.setName(boardName);
-//            board.setTeamLeader(user);
-//            entityManager.persist(board);
-//
-//            return Response.status(Response.Status.OK).entity(board).build();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Failed to create board").build();
-//        }
-//    }
-//    
-//    
-//    
-//    @DELETE
-//    @Path("/D_boards/{username}/{boardName}")
-//    @Transactional
-//    public Response deleteBoard(@PathParam("boardName") String boardName, @PathParam("username") String username) {
-//        try {
-//            // Check if the user is a TeamLeader
-//            User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
-//                                     .setParameter("username", username)
-//                                     .getSingleResult();
-//            if (user.getRole() != Role.TEAM_LEADER) {
-//                return Response.status(Response.Status.UNAUTHORIZED).entity("Only TeamLeader can delete boards").build();
-//            }
-//
-//            // Find the board by name
-//            Board board = entityManager.createQuery("SELECT b FROM Board b WHERE b.name = :boardName", Board.class)
-//                                      .setParameter("boardName", boardName)
-//                                      .getSingleResult();
-//            if (board == null) {
-//                return Response.status(Response.Status.NOT_FOUND).entity("Board not found").build();
-//            }
-//
-//            entityManager.remove(board);
-//
-//            return Response.status(Response.Status.OK).entity("Board deleted successfully").build();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Failed to delete board").build();
-//        }
-//    }
-//    
-//    
-//    
-//    
-//    @GET
-//    @Path("/List_Boards/{username}")
-//    public Response listBoards(@PathParam("username") String username ) {
-//        try {
-//            User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
-//                                     .setParameter("username", username)
-//                                     .getSingleResult();
-//
-//            List<Board> boards = entityManager.createQuery("SELECT b FROM Board b WHERE b.teamLeader :user", Board.class)
-//                                              .setParameter("user", user)
-//                                              .getResultList();
-//
-//            return Response.status(Response.Status.OK).entity(boards).build();
-//        } catch (NoResultException e) {
-//            return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Failed to list boards").build();
-//        }
-//    }
-//
-//    
+    
     
     
    

@@ -6,6 +6,7 @@ public class DTO {
 	    private String email;
 	    private String password;
         private Role   role;
+        private Long id;
 	    // Getters and setters
 	    public String getUsername() {
 	        return username;
@@ -21,6 +22,12 @@ public class DTO {
 
 	    public void setEmail(String email) {
 	        this.email = email;
+	    }
+	    public void setId(Long ID) {
+	        this.id = ID;
+	    }
+	    public Long getId() {
+	        return id;
 	    }
 
 	    public String getPassword() {

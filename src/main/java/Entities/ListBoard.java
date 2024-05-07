@@ -3,22 +3,16 @@ package Entities;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-
 @Entity
 @Table(name = "lists")
 public class ListBoard {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(unique=true,nullable = false)
     private String name;
-
-    @ManyToOne
-    @JoinColumn(name = "board_id", nullable = false)
-    private Board board;
-
     
     @OneToMany(mappedBy = "listboard", cascade = CascadeType.ALL)
     private List<Card> cards;
@@ -30,12 +24,15 @@ public class ListBoard {
     public ListBoard() {
         this.cards = new ArrayList<>();
     }
+    @ManyToOne
+    @JoinColumn(name = "board_id", nullable = false)
+    private Board board;
 
     public ListBoard(String name, Board board) {
         this.name = name;
         this.board = board;
         this.cards = new ArrayList<>();
-        this.listType = listType;
+        this.listType = listType.TODO;
     }
 
     // Getters and setters...
@@ -56,14 +53,6 @@ public class ListBoard {
         this.name = name;
     }
 
-    public Board getBoard() {
-        return board;
-    }
-
-    public void setBoard(Board board) {
-        this.board = board;
-    }
-
     public List<Card> getCards() {
         return cards;
     }
@@ -74,10 +63,12 @@ public class ListBoard {
 
     public void addCard(Card card) {
         cards.add(card);
+        card.setListboard(this); // Set the listboard for the card
     }
 
     public void removeCard(Card card) {
         cards.remove(card);
+        card.setListboard(null); // Remove the association from the card
     }
 
     public ListType getListType() {
@@ -87,4 +78,11 @@ public class ListBoard {
     public void setListType(ListType listType) {
         this.listType = listType;
     }
+    public void setBoard(Board board) {
+        this.board = board;
+    }
+    public Board getBoard() {
+    	return board;
+    } 
+    
 }
