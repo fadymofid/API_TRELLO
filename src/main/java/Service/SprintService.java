@@ -1,7 +1,7 @@
 package Service;
 
 import javax.ejb.Stateful;
-import javax.inject.Inject;
+
 import javax.persistence.EntityManager;
 
 import javax.persistence.PersistenceContext;
@@ -27,27 +27,26 @@ public class SprintService {
     @PersistenceContext(unitName = "hello")
     private EntityManager entityManager;
     
-    // Constructor
+   
 
-    private Sprint sprint; // Global sprint variable
+    private Sprint sprint;
 
     public Response endCurrentSprintAndStartNewOne() {
-        // Implement logic to end the current sprint and start a new one
-        // Move unfinished tasks to the new sprint
+        
         Sprint currentSprint = createSprint();
         if (currentSprint != null) {
-            currentSprint.setEndDate(new Date()); // Set end date of current sprint
+            currentSprint.setEndDate(new Date()); 
             entityManager.merge(currentSprint);
 
-            // Start a new sprint
+            
             Sprint newSprint = new Sprint();
-            newSprint.setStartDate(new Date()); // Set start date of new sprint
+            newSprint.setStartDate(new Date()); 
             entityManager.persist(newSprint);
 
             List<Task> unfinishedTasks = new ArrayList<>();
             for (Task task : currentSprint.getTasks()) {
                 if (!task.isCompleted()) {
-                    Task newTask = new Task(); // Create a new task for the new sprint
+                    Task newTask = new Task(); 
                     newTask.setname(task.getname());
                     newTask.setstoryPoints(task.getStoryPoints());
                     newTask.setCompleted(task.isCompleted());
@@ -64,7 +63,7 @@ public class SprintService {
     }
     
     public Response generateSprintReport(Long sprintId) {
-        // Implement logic to generate sprint report based on sprint ID
+       
         Sprint sprint = entityManager.find(Sprint.class, sprintId);
         if (sprint == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("Sprint not found").build();
@@ -76,8 +75,7 @@ public class SprintService {
    
 
     private SprintReport generateReport(Sprint sprint) {
-        // Implement logic to generate sprint report
-        // Calculate total completed story points and total uncompleted story points
+        
         int totalCompletedStoryPoints = 0;
         int totalUncompletedStoryPoints = 0;
         for (Task task : sprint.getTasks()) {
@@ -95,21 +93,21 @@ public class SprintService {
     }
 
     private Sprint createSprint() {
-        Sprint newSprint = new Sprint(); // Initialize a new sprint
-        // Create a list of dummy tasks
+        Sprint newSprint = new Sprint(); 
+       
         List<Task> tasks = new ArrayList<>();
         Task task1 = new Task();
         task1.setname("Task 1");
         task1.setstoryPoints(10);
-        task1.setCompleted(false); // Set as incomplete
+        task1.setCompleted(false); 
         tasks.add(task1);
         Task task2 = new Task();
         task2.setname("Task 2");
         task2.setstoryPoints(8);
-        task2.setCompleted(true); // Set as completed
+        task2.setCompleted(true); 
         tasks.add(task2);
-        // Add more tasks as needed
-        newSprint.setTasks(tasks); // Set tasks for the new sprint
+        
+        newSprint.setTasks(tasks); 
         return newSprint;
     }
 

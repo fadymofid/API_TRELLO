@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.*;
-import Entities.Role;
+
 @Entity
 @Table(name ="users")
 public class User {
@@ -28,17 +28,13 @@ public class User {
     @ManyToMany(mappedBy = "collaborators")
     private List<Board> collaboratedBoards = new ArrayList<>();
   
-   
-    // Constructors, getters, and setters
 
     public User() {
     }
 
    
 
-    // Getters and Setters
-
-    // id
+    
     public Long getId() {
         return id;
     }
@@ -47,7 +43,7 @@ public class User {
         this.id = id;
     }
 
-    // username
+   
     public String getUsername() {
         return username;
     }
@@ -56,7 +52,6 @@ public class User {
         this.username = username;
     }
 
-    // email
     public String getEmail() {
         return email;
     }
@@ -65,7 +60,7 @@ public class User {
         this.email = email;
     }
 
-    // password
+    
     public String getPassword() {
         return password;
     }

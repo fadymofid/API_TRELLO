@@ -4,22 +4,19 @@ import javax.ws.rs.*;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import Entities.User;
 import Entities.Board;
 import Entities.Card;
-import Entities.Role;
+
 import Entities.ListBoard;
-import Entities.ListType;
+
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import Service.ListBoardDto;
-import Service.BoardDto;
+
 @Stateful
 @Path("/Cservice")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -77,7 +74,7 @@ public class CalloboratorService {
        .setParameter("listName", listname)
        .getSingleResult();
 
-            // Append the new comment to the existing comments with a separator
+            
             String updatedComments = card.getComments() != null ? card.getComments() + ", " + comment : comment;
             card.setComments(updatedComments);
             entityManager.merge(card);
@@ -98,7 +95,7 @@ public class CalloboratorService {
                                          String description,
                                         String listName) {
         try {
-            // Retrieve the card based on the cardName and listName
+          
             Card card = entityManager.createQuery("SELECT NEW Card(c.id, c.Name, c.description, c.comments, b) " +
                                                   "FROM Card c JOIN c.listboard b " +
                                                   "WHERE c.Name = :cardName AND b.name = :listName", Card.class)
@@ -106,7 +103,7 @@ public class CalloboratorService {
                                      .setParameter("listName", listName)
                                      .getSingleResult();
 
-            // Update the card's description
+        
             card.setDescription(description);
             entityManager.merge(card);
 
@@ -124,7 +121,7 @@ public class CalloboratorService {
 
     public Response viewList( String listName) {
         try {
-            // Retrieve all cards in the specified list along with assigned users
+          
             List<Object[]> results = entityManager.createQuery("SELECT c, u.username " +
                                                                  "FROM Card c " +
                                                                  "JOIN c.assignees u " +
@@ -133,21 +130,21 @@ public class CalloboratorService {
                                                     .setParameter("listName", listName)
                                                     .getResultList();
 
-            // Create a list to hold CardDTOs
+          
             List<CardDTO> cardDTOs = new ArrayList<>();
 
-            // Populate the list with CardDTOs
+           
             for (Object[] result : results) {
                 Card card = (Card) result[0];
                 String username = (String) result[1];
 
-                // Check if a CardDTO for this card already exists in the list
+             
                 CardDTO cardDTO = cardDTOs.stream()
                                            .filter(dto -> dto.getId().equals(card.getId()))
                                            .findFirst()
                                            .orElse(null);
 
-                // If a CardDTO doesn't exist, create a new one and add it to the list
+               
                 if (cardDTO == null) {
                     cardDTO = new CardDTO();
                     cardDTO.setId(card.getId());
@@ -159,11 +156,11 @@ public class CalloboratorService {
                     cardDTOs.add(cardDTO);
                 }
 
-                // Add the assigned user to the CardDTO
+              
                 cardDTO.getAssignedUsers().add(username);
             }
 
-            // Return the list of CardDTOs
+        
             return Response.status(Response.Status.OK)
                            .entity(cardDTOs)
                            .build();
@@ -218,7 +215,7 @@ public class CalloboratorService {
             String sourceListName,
             String targetListName) {
         try {
-            // Find the card by name
+            
             Card card = entityManager.createQuery("SELECT c FROM Card c WHERE c.Name = :cardName", Card.class)
                                     .setParameter("cardName", cardName)
                                     .getSingleResult();
@@ -228,7 +225,7 @@ public class CalloboratorService {
                         .build();
             }
 
-            // Find the source list by name
+          
             ListBoard sourceList = entityManager.createQuery("SELECT l FROM ListBoard l WHERE l.name = :sourceListName", ListBoard.class)
                                                .setParameter("sourceListName", sourceListName)
                                                .getSingleResult();
@@ -238,8 +235,7 @@ public class CalloboratorService {
                         .build();
             }
 
-            // Find the target list by name
-            ListBoard targetList = entityManager.createQuery("SELECT l FROM ListBoard l WHERE l.name = :targetListName", ListBoard.class)
+          ListBoard targetList = entityManager.createQuery("SELECT l FROM ListBoard l WHERE l.name = :targetListName", ListBoard.class)
                                                .setParameter("targetListName", targetListName)
                                                .getSingleResult();
             if (targetList == null) {
@@ -248,12 +244,12 @@ public class CalloboratorService {
                         .build();
             }
 
-            // Move the card to the target list
+           
             card.setListboard(targetList);
 
             entityManager.merge(card);
 
-            // Construct a message to return
+            
             String message = String.format("Card '%s' moved from list '%s' to list '%s'", cardName, sourceListName, targetListName);
 
             return Response.status(Response.Status.OK)

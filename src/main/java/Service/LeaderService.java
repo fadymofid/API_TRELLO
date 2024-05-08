@@ -5,8 +5,7 @@ import javax.ws.rs.*;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
+
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import Entities.User;
@@ -67,7 +66,7 @@ public class LeaderService {
                                 .map(this::mapToListBoardDto)
                                 .collect(Collectors.toList()));
                         
-                        // Fetch collaborators for the board
+                       
                         List<User> collaborators = entityManager.createQuery("SELECT u FROM Board b JOIN b.collaborators u WHERE b = :board", User.class)
                                 .setParameter("board", board)
                                 .getResultList();
@@ -182,12 +181,12 @@ public class LeaderService {
         
 
         try {
-            // Find the board by name
+           
             Board board = entityManager.createQuery("SELECT b FROM Board b WHERE b.name = :boardName", Board.class)
                     .setParameter("boardName", boardName)
                     .getSingleResult();
 
-            // Find the user by username
+          
             User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                     .setParameter("username", username)
                     .getSingleResult();
@@ -205,7 +204,7 @@ public class LeaderService {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User "+user.getUsername()+":is already exsist").build();
             }
             
-            // Invite the user to collaborate on the board
+           
             board.inviteCollaborator(user);
             entityManager.merge(board);
 

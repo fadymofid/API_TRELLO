@@ -35,7 +35,7 @@ public class ListBoard {
         this.listType = listType.TODO;
     }
 
-    // Getters and setters...
+
 
     public Long getId() {
         return id;
@@ -63,12 +63,12 @@ public class ListBoard {
 
     public void addCard(Card card) {
         cards.add(card);
-        card.setListboard(this); // Set the listboard for the card
+        card.setListboard(this); 
     }
 
     public void removeCard(Card card) {
         cards.remove(card);
-        card.setListboard(null); // Remove the association from the card
+        card.setListboard(null); 
     }
 
     public ListType getListType() {

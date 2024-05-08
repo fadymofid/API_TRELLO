@@ -22,9 +22,8 @@ public class Card {
     private String description;
     
     @Column
-    private String comments; // Change the type to String
-
-    @ManyToOne(fetch = FetchType.EAGER) // Eagerly fetch the ListBoard association
+    private String comments; 
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "listboard_id", nullable = false)
     private ListBoard listboard;
     
@@ -45,8 +44,7 @@ public class Card {
     }
 
 
-    // Getters and setters...
-  
+    
     public String getDescription() {
         return description;
     }

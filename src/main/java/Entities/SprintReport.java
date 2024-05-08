@@ -5,13 +5,9 @@ public class SprintReport {
     private int totalCompletedStoryPoints;
     private int totalUncompletedStoryPoints;
     
-    // Remove the reference to Sprint
-    // private Sprint sprintMetadata;
-
-    // Constructor
+   
     public SprintReport() {}
 
-    // Getters and Setters
 
     public Long getSprintId() {
         return sprintId;
@@ -37,14 +33,5 @@ public class SprintReport {
         this.totalUncompletedStoryPoints = totalUncompletedStoryPoints;
     }
 
-    // Remove this method
-    /*
-    public Sprint getSprintMetadata() {
-        return sprintMetadata;
-    }
-
-    public void setSprintMetadata(Sprint sprint) {
-        this.sprintMetadata = sprint;
-    }
-    */
+   
 }

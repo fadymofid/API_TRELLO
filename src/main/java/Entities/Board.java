@@ -27,19 +27,19 @@ public class Board {
     private List<User> collaborators = new ArrayList<>();
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
-    private List<ListBoard> lists; // Change the list type to List<ListBoard>
+    private List<ListBoard> lists; 
 
     public Board() {
-        this.lists = new ArrayList<>(); // Initialize the list in the constructor
+        this.lists = new ArrayList<>();
     }
 
     public Board(String name, User teamLeader, ListType listType) {
         this.name = name;
         this.teamLeader = teamLeader;
-        this.lists = new ArrayList<>(); // Initialize the list in the constructor
+        this.lists = new ArrayList<>(); 
     }
 
-    // Getters and setters...
+  
 
     public String getName() {
         return name;
@@ -72,13 +72,13 @@ public class Board {
     }
 
     public void addList(ListBoard list) {
+    	
         lists.add(list);
-        list.setBoard(this); // Set the board for the list
     }
 
     public void removeList(ListBoard list) {
         lists.remove(list);
-        list.setBoard(null); // Remove the association from the list
+        list.setBoard(null); 
     }
     public List<User> getCollaborators() {
         return collaborators;

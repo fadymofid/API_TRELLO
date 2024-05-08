@@ -7,7 +7,7 @@ public class CardDTO {
     private String description;
     public String Name;
     private String comments;
-    private Long listBoardId; // Instead of the entire ListBoard entity
+    private Long listBoardId; 
     private List<String> assignedUsers;
 
     public CardDTO() {
