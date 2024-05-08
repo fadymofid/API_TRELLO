@@ -28,13 +28,12 @@ public class CalloboratorService {
 	@PersistenceContext(unitName = "hello")
     private EntityManager entityManager;
 
-	@POST
-    @Path("/CreateCard/{username}/{cardName}/{boardName}/{listName}")
-    @Transactional
-    public Response createCard(@PathParam("username") String username,
-                               @PathParam("boardName") String boardName,
-                               @PathParam("cardName") String cardName,
-                               @PathParam("listName") String listName) {
+	
+
+    public Response createCard( String username,
+                               String boardName,
+                                String cardName,
+                               String listName) {
         try {
              User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                      .setParameter("username", username)
@@ -66,12 +65,10 @@ public class CalloboratorService {
         }
 
     }
-    @POST
-    @Path("/addComment/{cardName}/{comment}/{listname}")
-    @Transactional
-    public Response addCommentToCard(@PathParam("cardName") String cardName,
-                                     @PathParam("comment") String comment,
-                                     @PathParam("listname") String listname) {
+  
+    public Response addCommentToCard( String cardName,
+                                     String comment,
+                                     String listname) {
         try {
         	Card card = entityManager.createQuery("SELECT NEW Card(c.id, c.Name, c.description, c.comments, b) " +
                     "FROM Card c JOIN c.listboard b " +
@@ -96,12 +93,10 @@ public class CalloboratorService {
         }
     }
     
-    @POST
-    @Path("/addDes/{cardName}/{description}/{listName}")
-    @Transactional
-    public Response addDescriptionToCard(@PathParam("cardName") String cardName,
-                                         @PathParam("description") String description,
-                                         @PathParam("listName") String listName) {
+ 
+    public Response addDescriptionToCard( String cardName,
+                                         String description,
+                                        String listName) {
         try {
             // Retrieve the card based on the cardName and listName
             Card card = entityManager.createQuery("SELECT NEW Card(c.id, c.Name, c.description, c.comments, b) " +
@@ -126,10 +121,8 @@ public class CalloboratorService {
         }
     }
     
-    @GET
-    @Path("/viewList/{listName}")
-    @Transactional
-    public Response viewList(@PathParam("listName") String listName) {
+
+    public Response viewList( String listName) {
         try {
             // Retrieve all cards in the specified list along with assigned users
             List<Object[]> results = entityManager.createQuery("SELECT c, u.username " +
@@ -182,9 +175,7 @@ public class CalloboratorService {
         }
     }
 
-    @POST
-    @Path("/assignCard/{cardName}")
-    @Transactional
+
     public Response assignCardToUsers(@PathParam("cardName") String cardName,
                                       List<String> usernames) {
         try {
@@ -221,13 +212,11 @@ public class CalloboratorService {
                            .build();
         }
     }
-    @POST
-    @Path("/moveCard/{cardName}/{sourceListName}/{targetListName}")
-    @Transactional
+   
     public Response moveCard(
-            @PathParam("cardName") String cardName,
-            @PathParam("sourceListName") String sourceListName,
-            @PathParam("targetListName") String targetListName) {
+            String cardName,
+            String sourceListName,
+            String targetListName) {
         try {
             // Find the card by name
             Card card = entityManager.createQuery("SELECT c FROM Card c WHERE c.Name = :cardName", Card.class)

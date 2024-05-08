@@ -1,8 +1,9 @@
 package Service;
 
 
-import javax.ejb.Stateful;
+
 import javax.ws.rs.*;
+import javax.ejb.Stateful;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -11,10 +12,7 @@ import javax.transaction.Transactional;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import Entities.User;
-import Entities.Board;
-import Entities.Role;
 
-import java.util.List;
 
 @Stateful
 @Path("/Uservice")
@@ -24,19 +22,14 @@ public class UserService {
 
     @PersistenceContext(unitName = "hello")
     private EntityManager entityManager;
- 	@POST
-	@Path("/aaa")
-	public Response aaa() {
-		
-		 
-	    return Response.status(Response.Status.OK).entity(entityManager.createQuery("SELECT a FROM User a ").getResultList()).build();
-        
-	}
-        
 
-    @POST
-    @Path("/register")
-    @Transactional
+    public Response listUsers() {
+        return Response.status(Response.Status.OK)
+                       .entity(entityManager.createQuery("SELECT a FROM User a ").getResultList())
+                       .build();
+    }
+
+    
     public Response registerUser(User user) {
         try {
             // Check if username or email already exists
@@ -72,9 +65,8 @@ public class UserService {
   
   
 
-    @GET
-    @Path("/login/{username}/{password}")
-    public Response login (@PathParam("username") String username, @PathParam("password") String password) {
+  
+    public Response login ( String username,  String password) {
         TypedQuery<User> query = entityManager.createQuery(
                 "SELECT u FROM User u WHERE u.username = :username", User.class);
         query.setParameter("username", username);
@@ -92,10 +84,8 @@ public class UserService {
     }
 
     
-    
-    @PUT
-    @Path("/profile/{username}")
-    public Response updateProfile(@PathParam("username") String username, User profileUpdate) {
+   
+    public Response updateProfile( String username, User profileUpdate) {
         try {
             // Retrieve the user from the database
             TypedQuery<User> query = entityManager.createQuery(

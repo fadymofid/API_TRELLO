@@ -25,10 +25,8 @@ public class LeaderService {
     @PersistenceContext(unitName = "hello")
     private EntityManager entityManager;
 
-    @POST
-    @Path("/boards/{username}/{boardName}")
-    @Transactional
-    public Response createBoard(@PathParam("username") String username, @PathParam("boardName") String boardName) {
+ 
+    public Response createBoard( String username, String boardName) {
         try {
             User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                                      .setParameter("username", username)
@@ -49,9 +47,8 @@ public class LeaderService {
         }
     }
 
-    @GET
-    @Path("/List_Boards/{username}")
-    public Response listBoards(@PathParam("username") String username) {
+   
+    public Response listBoards( String username) {
         try {
             User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                                      .setParameter("username", username)
@@ -91,12 +88,11 @@ public class LeaderService {
 
 
 
-    @POST
-    @Path("/lists/{username}/{boardName}/{listName}/{listType}")
-    public Response createList(@PathParam("username") String username,
-                               @PathParam("boardName") String boardName,
-                               @PathParam("listName") String listName,
-                               @PathParam("listType") ListType listType) {
+
+    public Response createList( String username,
+                              String boardName,
+                              String listName,
+                                ListType listType) {
         try {
             User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                                      .setParameter("username", username)
@@ -132,12 +128,10 @@ public class LeaderService {
         }
     }
 
-    @DELETE
-    @Path("/dlists/{username}/{boardName}/{listName}")
-    @Transactional
-    public Response deleteList(@PathParam("username") String username,
-                               @PathParam("boardName") String boardName,
-                               @PathParam("listName") String listName) {
+  
+    public Response deleteList( String username,
+                                String boardName,
+                               String listName) {
         try {
             User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                                      .setParameter("username", username)
@@ -180,13 +174,11 @@ public class LeaderService {
         }
     }
 
-    @POST
-    @Path("/inviteCollaborator/{leadername}/{boardName}/{username}")
-    @Transactional
+  
     public Response inviteCollaborator(
-            @PathParam("leadername") String leadername,
-            @PathParam("boardName") String boardName,
-            @PathParam("username") String username) {
+            String leadername,
+            String boardName,
+             String username) {
         
 
         try {
