@@ -1,22 +1,34 @@
 package Service;
+import javax.annotation.Resource;
 import javax.ejb.Stateful;
+import javax.inject.Inject;
+import javax.jms.JMSConsumer;
+import javax.jms.JMSContext;
+import javax.jms.JMSProducer;
+import javax.jms.Queue;
+import javax.jms.TextMessage;
 import javax.ws.rs.*;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-
+import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import DTO.BoardDto;
+import DTO.CardDTO;
+import DTO.ListBoardDto;
 import Entities.User;
 import Entities.Board;
 import Entities.Card;
-
+import Entities.Role;
 import Entities.ListBoard;
-
+import Entities.ListType;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.stream.Collectors;
 @Stateful
 @Path("/Cservice")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -25,12 +37,18 @@ public class CalloboratorService {
 	@PersistenceContext(unitName = "hello")
     private EntityManager entityManager;
 
+	 @Inject
+	    JMSContext context;
+	    @Resource(mappedName = "java:/jms/queue/MyTrelloQueue")
+	   private Queue MyTrelloQueue;
+	    
+	
 	
 
     public Response createCard( String username,
-                               String boardName,
+                                String boardName,
                                 String cardName,
-                               String listName) {
+                              String listName) {
         try {
              User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                      .setParameter("username", username)
@@ -45,11 +63,6 @@ public class CalloboratorService {
              card.Name=cardName;
              card.setListboard(lBoard);
              entityManager.persist(card);
-
-
-
-
-
              return Response.status(Response.Status.OK)
                 .entity("Card created successfully")
                 .build();
@@ -62,11 +75,17 @@ public class CalloboratorService {
         }
 
     }
-  
+   
     public Response addCommentToCard( String cardName,
-                                     String comment,
-                                     String listname) {
+                                      String comment,
+                                      String listname, 
+								    String username) {
         try {
+        	  User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+                      .setParameter("username", username)
+                      .getSingleResult();
+        	 
+        	
         	Card card = entityManager.createQuery("SELECT NEW Card(c.id, c.Name, c.description, c.comments, b) " +
                     "FROM Card c JOIN c.listboard b " +
                     "WHERE c.Name = :cardName AND b.name = :listName", Card.class)
@@ -74,11 +93,17 @@ public class CalloboratorService {
        .setParameter("listName", listname)
        .getSingleResult();
 
-            
-            String updatedComments = card.getComments() != null ? card.getComments() + ", " + comment : comment;
+        	 
+        	 JMSProducer producer = context.createProducer();
+             TextMessage message = context.createTextMessage(user.getUsername()+" has added a comment: "+comment);
+             producer.send(MyTrelloQueue, message);
+        	 
+             JMSConsumer consumer = context.createConsumer(MyTrelloQueue);
+           	 TextMessage msg = (TextMessage) consumer.receiveNoWait();
+           	 consumer.close();
+             String updatedComments = card.getComments() != null ? card.getComments() + ", " + comment : comment;
             card.setComments(updatedComments);
             entityManager.merge(card);
-
             return Response.status(Response.Status.OK)
                            .entity("Comment added successfully")
                            .build();
@@ -90,20 +115,24 @@ public class CalloboratorService {
         }
     }
     
- 
+    
     public Response addDescriptionToCard( String cardName,
-                                         String description,
-                                        String listName) {
+                                          String description,
+                                          String listName) {
         try {
-          
             Card card = entityManager.createQuery("SELECT NEW Card(c.id, c.Name, c.description, c.comments, b) " +
                                                   "FROM Card c JOIN c.listboard b " +
                                                   "WHERE c.Name = :cardName AND b.name = :listName", Card.class)
                                      .setParameter("cardName", cardName)
                                      .setParameter("listName", listName)
                                      .getSingleResult();
-
-        
+            
+       	 JMSProducer producer = context.createProducer();
+         TextMessage message = context.createTextMessage(" description: "+description+" has been added to :"+cardName);
+         producer.send(MyTrelloQueue, message);
+         JMSConsumer consumer = context.createConsumer(MyTrelloQueue);
+       	 TextMessage msg = (TextMessage) consumer.receiveNoWait();
+       	 consumer.close();
             card.setDescription(description);
             entityManager.merge(card);
 
@@ -118,10 +147,9 @@ public class CalloboratorService {
         }
     }
     
-
+  
     public Response viewList( String listName) {
         try {
-          
             List<Object[]> results = entityManager.createQuery("SELECT c, u.username " +
                                                                  "FROM Card c " +
                                                                  "JOIN c.assignees u " +
@@ -130,21 +158,17 @@ public class CalloboratorService {
                                                     .setParameter("listName", listName)
                                                     .getResultList();
 
-          
             List<CardDTO> cardDTOs = new ArrayList<>();
 
-           
             for (Object[] result : results) {
                 Card card = (Card) result[0];
                 String username = (String) result[1];
 
-             
                 CardDTO cardDTO = cardDTOs.stream()
                                            .filter(dto -> dto.getId().equals(card.getId()))
                                            .findFirst()
                                            .orElse(null);
 
-               
                 if (cardDTO == null) {
                     cardDTO = new CardDTO();
                     cardDTO.setId(card.getId());
@@ -156,11 +180,9 @@ public class CalloboratorService {
                     cardDTOs.add(cardDTO);
                 }
 
-              
                 cardDTO.getAssignedUsers().add(username);
             }
 
-        
             return Response.status(Response.Status.OK)
                            .entity(cardDTOs)
                            .build();
@@ -172,14 +194,21 @@ public class CalloboratorService {
         }
     }
 
-
-    public Response assignCardToUsers(@PathParam("cardName") String cardName,
+    
+    public Response assignCardToUsers( String cardName,
                                       List<String> usernames) {
         try {
             Card card = entityManager.createQuery("SELECT c FROM Card c WHERE c.Name = :cardName", Card.class)
                                      .setParameter("cardName", cardName)
                                      .getSingleResult();
-
+            String messageContent = String.join(", ", usernames) + " have been assigned to: " + cardName;
+            JMSProducer producer = context.createProducer();
+            TextMessage message = context.createTextMessage(messageContent);
+            producer.send(MyTrelloQueue, message);
+       	 
+            JMSConsumer consumer = context.createConsumer(MyTrelloQueue);
+          	 TextMessage msg = (TextMessage) consumer.receiveNoWait();
+          	 consumer.close();
             for (String username : usernames) {
                 User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                                          .setParameter("username", username)
@@ -209,13 +238,12 @@ public class CalloboratorService {
                            .build();
         }
     }
-   
+
     public Response moveCard(
             String cardName,
-            String sourceListName,
-            String targetListName) {
+             String sourceListName,
+           String targetListName) {
         try {
-            
             Card card = entityManager.createQuery("SELECT c FROM Card c WHERE c.Name = :cardName", Card.class)
                                     .setParameter("cardName", cardName)
                                     .getSingleResult();
@@ -225,7 +253,6 @@ public class CalloboratorService {
                         .build();
             }
 
-          
             ListBoard sourceList = entityManager.createQuery("SELECT l FROM ListBoard l WHERE l.name = :sourceListName", ListBoard.class)
                                                .setParameter("sourceListName", sourceListName)
                                                .getSingleResult();
@@ -235,7 +262,7 @@ public class CalloboratorService {
                         .build();
             }
 
-          ListBoard targetList = entityManager.createQuery("SELECT l FROM ListBoard l WHERE l.name = :targetListName", ListBoard.class)
+            ListBoard targetList = entityManager.createQuery("SELECT l FROM ListBoard l WHERE l.name = :targetListName", ListBoard.class)
                                                .setParameter("targetListName", targetListName)
                                                .getSingleResult();
             if (targetList == null) {
@@ -243,13 +270,19 @@ public class CalloboratorService {
                         .entity("Target list not found")
                         .build();
             }
+            String messageContent = (cardName+ " have been moved to: " + sourceListName);
+            JMSProducer producer = context.createProducer();
+            TextMessage message1 = context.createTextMessage(messageContent);
+            producer.send(MyTrelloQueue, message1);
+       	 
+            JMSConsumer consumer = context.createConsumer(MyTrelloQueue);
+          	 TextMessage msg = (TextMessage) consumer.receiveNoWait();
+          	 consumer.close();
 
-           
             card.setListboard(targetList);
 
             entityManager.merge(card);
 
-            
             String message = String.format("Card '%s' moved from list '%s' to list '%s'", cardName, sourceListName, targetListName);
 
             return Response.status(Response.Status.OK)

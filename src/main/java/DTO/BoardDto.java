@@ -1,9 +1,10 @@
-package Service;
+package DTO;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
+import Entities.ListBoard;
+import Entities.ListType;
 import Entities.User;
 
 public class BoardDto {
@@ -15,7 +16,6 @@ public class BoardDto {
     private List<User> collaborators = new ArrayList<>();
 
 
- 
 
     public List<User> getCollaborators() {
         return collaborators;

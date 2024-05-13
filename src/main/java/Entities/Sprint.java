@@ -8,7 +8,11 @@ import java.util.List;
 public class Sprint {
 
     @Id
+<<<<<<< HEAD
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+=======
+    @GeneratedValue(strategy = GenerationType.AUTO)
+>>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
     private Long id;
 
     private Date startDate;

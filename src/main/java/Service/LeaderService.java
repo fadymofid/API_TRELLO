@@ -1,13 +1,25 @@
 package Service;
 
+import javax.annotation.Resource;
 import javax.ejb.Stateful;
+import javax.inject.Inject;
+import javax.jms.JMSConsumer;
+import javax.jms.JMSContext;
+import javax.jms.JMSProducer;
+import javax.jms.Queue;
+import javax.jms.TextMessage;
 import javax.ws.rs.*;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-
+import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import DTO.BoardDto;
+import DTO.DTO;
+import DTO.ListBoardDto;
 import Entities.User;
 import Entities.Board;
 import Entities.Role;
@@ -23,21 +35,34 @@ import java.util.stream.Collectors;
 public class LeaderService {
     @PersistenceContext(unitName = "hello")
     private EntityManager entityManager;
-
- 
-    public Response createBoard( String username, String boardName) {
+    
+    @Inject
+    JMSContext context;
+    @Resource(mappedName = "java:/jms/queue/MyTrelloQueue")
+   private Queue MyTrelloQueue;
+    
+    
+    public Response createBoard( String username,  String boardName) {
         try {
             User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                                      .setParameter("username", username)
                                      .getSingleResult();
             if (user.getRole() != Role.TEAM_LEADER) {
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Only TeamLeader can create boards").build();
+                return Response.status(Response.Status.FORBIDDEN).entity("Only TeamLeader can create boards").build();
             }
-
+            String messageContent = (username + " created board named : " + boardName);
+            JMSProducer producer = context.createProducer();
+            TextMessage message = context.createTextMessage(messageContent);
+            producer.send(MyTrelloQueue, message);
+       	 
+            JMSConsumer consumer = context.createConsumer(MyTrelloQueue);
+          	 TextMessage msg = (TextMessage) consumer.receiveNoWait();
+          	 consumer.close();
             Board board = new Board();
             board.setName(boardName);
             board.setTeamLeader(user);
             entityManager.persist(board);
+            
 
             return Response.status(Response.Status.OK).entity(board).build();
         } catch (Exception e) {
@@ -66,7 +91,6 @@ public class LeaderService {
                                 .map(this::mapToListBoardDto)
                                 .collect(Collectors.toList()));
                         
-                       
                         List<User> collaborators = entityManager.createQuery("SELECT u FROM Board b JOIN b.collaborators u WHERE b = :board", User.class)
                                 .setParameter("board", board)
                                 .getResultList();
@@ -87,17 +111,17 @@ public class LeaderService {
 
 
 
-
+   
     public Response createList( String username,
-                              String boardName,
-                              String listName,
+                                String boardName,
+                                String listName,
                                 ListType listType) {
         try {
             User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                                      .setParameter("username", username)
                                      .getSingleResult();
             if (user.getRole() != Role.TEAM_LEADER) {
-                return Response.status(Response.Status.UNAUTHORIZED)
+                return Response.status(Response.Status.FORBIDDEN)
                                .entity("Only TeamLeader can create lists")
                                .build();
             }
@@ -127,16 +151,16 @@ public class LeaderService {
         }
     }
 
-  
+
     public Response deleteList( String username,
                                 String boardName,
-                               String listName) {
+                                String listName) {
         try {
             User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                                      .setParameter("username", username)
                                      .getSingleResult();
             if (user.getRole() != Role.TEAM_LEADER) {
-                return Response.status(Response.Status.UNAUTHORIZED)
+                return Response.status(Response.Status.FORBIDDEN)
                                .entity("Only TeamLeader can delete lists")
                                .build();
             }
@@ -173,38 +197,74 @@ public class LeaderService {
         }
     }
 
-  
+    public Response deleteBoard(String username, String boardName) {
+        try {
+            User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+                                     .setParameter("username", username)
+                                     .getSingleResult();
+            if (user.getRole() != Role.TEAM_LEADER) {
+                return Response.status(Response.Status.FORBIDDEN)
+                               .entity("Only TeamLeader can delete boards")
+                               .build();
+            }
+
+            Board board = entityManager.createQuery("SELECT b FROM Board b WHERE b.name = :boardName", Board.class)
+                                      .setParameter("boardName", boardName)
+                                      .getSingleResult();
+            if (board == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                               .entity("Board not found")
+                               .build();
+            }
+
+            entityManager.remove(board);
+
+            return Response.status(Response.Status.OK)
+                           .entity("Board deleted successfully")
+                           .build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                           .entity("Failed to delete board")
+                           .build();
+        }
+    }
+
+    
     public Response inviteCollaborator(
             String leadername,
             String boardName,
-             String username) {
+           String username) {
         
 
         try {
-           
             Board board = entityManager.createQuery("SELECT b FROM Board b WHERE b.name = :boardName", Board.class)
                     .setParameter("boardName", boardName)
                     .getSingleResult();
 
-          
             User user = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
                     .setParameter("username", username)
                     .getSingleResult();
             User leader = entityManager.createQuery("SELECT u FROM User u WHERE u.username = :leadername", User.class)
                     .setParameter("leadername", leadername)
                     .getSingleResult();
+            JMSProducer producer = context.createProducer();
+            TextMessage message = context.createTextMessage("You have been invited ");
+            producer.send(MyTrelloQueue, message);
+            JMSConsumer consumer = context.createConsumer(MyTrelloQueue);
+            TextMessage msg = (TextMessage) consumer.receiveNoWait();
+            consumer.close();
             
             if (leader.getRole() != Role.TEAM_LEADER) {
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Only TeamLeader can invite collaborator").build();
+                return Response.status(Response.Status.FORBIDDEN).entity("Only TeamLeader can invite collaborator").build();
             }
             if (user.getRole() != Role.COLLABORATOR) {
-                return Response.status(Response.Status.UNAUTHORIZED).entity("Only collaborator can be invited").build();
+                return Response.status(Response.Status.FORBIDDEN).entity("Only collaborator can be invited").build();
             }
             if (board.getCollaborators().contains(user)) {
-                return Response.status(Response.Status.UNAUTHORIZED).entity("User "+user.getUsername()+":is already exsist").build();
+                return Response.status(Response.Status.FORBIDDEN).entity("User "+user.getUsername()+":is already exsist").build();
             }
             
-           
             board.inviteCollaborator(user);
             entityManager.merge(board);
 

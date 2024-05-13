@@ -23,14 +23,13 @@ public class Board {
     @JoinTable(name = "board_collaborators",
                joinColumns = @JoinColumn(name = "board_id"),
                inverseJoinColumns = @JoinColumn(name = "user_id"))
-    
     private List<User> collaborators = new ArrayList<>();
 
     @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
-    private List<ListBoard> lists; 
+    private List<ListBoard> lists;
 
     public Board() {
-        this.lists = new ArrayList<>();
+        this.lists = new ArrayList<>(); 
     }
 
     public Board(String name, User teamLeader, ListType listType) {
@@ -39,7 +38,6 @@ public class Board {
         this.lists = new ArrayList<>(); 
     }
 
-  
 
     public String getName() {
         return name;
@@ -72,8 +70,8 @@ public class Board {
     }
 
     public void addList(ListBoard list) {
-    	
         lists.add(list);
+        list.setBoard(this); 
     }
 
     public void removeList(ListBoard list) {

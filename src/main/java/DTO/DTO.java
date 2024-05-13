@@ -1,4 +1,4 @@
-package Service;
+package DTO;
 import Entities.Role;
 public class DTO {
 	
@@ -7,7 +7,10 @@ public class DTO {
 	    private String password;
         private Role   role;
         private Long id;
+<<<<<<< HEAD:src/main/java/Service/DTO.java
 	    
+=======
+>>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad:src/main/java/DTO/DTO.java
 	    public String getUsername() {
 	        return username;
 	    }

@@ -4,6 +4,10 @@ package Controller;
 import java.util.List;
 
 import javax.ejb.Stateful;
+<<<<<<< HEAD
+=======
+import javax.ejb.Stateless;
+>>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
 import javax.inject.Inject;
 import javax.ws.rs.*;
 
@@ -14,12 +18,17 @@ import javax.ws.rs.core.Response;
 
 import Service.CalloboratorService;
 
+<<<<<<< HEAD
 @Stateful
+=======
+@Stateless
+>>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
 @Path("/Ccontrol")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 
 public class CollaboratorController {
+<<<<<<< HEAD
 	  @Inject
 	    private CalloboratorService collaboratorService;
 
@@ -74,3 +83,60 @@ public class CollaboratorController {
 	        return collaboratorService.moveCard(cardName, sourceListName, targetListName);
 	    }
 }
+=======
+  @Inject
+    private CalloboratorService collaboratorService;
+
+    @POST
+    @Path("/CreateCard/{username}/{cardName}/{boardName}/{listName}")
+    public Response createCard(
+            @PathParam("username") String username,
+            @PathParam("cardName") String cardName,
+            @PathParam("boardName") String boardName,
+            @PathParam("listName") String listName) {
+        return collaboratorService.createCard(username, boardName, cardName, listName);
+    }
+
+    @POST
+    @Path("/addComment/{cardName}/{comment}/{listname}/{username}")
+    public Response addCommentToCard(
+            @PathParam("cardName") String cardName,
+            @PathParam("comment") String comment,
+            @PathParam("listname") String listname,
+            @PathParam("username") String username) {
+        return collaboratorService.addCommentToCard(cardName, comment, listname,username);
+    }
+
+    @POST
+    @Path("/addDes/{cardName}/{description}/{listName}")
+    public Response addDescriptionToCard(
+            @PathParam("cardName") String cardName,
+            @PathParam("description") String description,
+            @PathParam("listName") String listName) {
+        return collaboratorService.addDescriptionToCard(cardName, description, listName);
+    }
+
+    @GET
+    @Path("/viewList/{listName}")
+    public Response viewList(@PathParam("listName") String listName) {
+        return collaboratorService.viewList(listName);
+    }
+
+    @POST
+    @Path("/assignCard/{cardName}")
+    public Response assignCardToUsers(
+            @PathParam("cardName") String cardName,
+            List<String> usernames) {
+        return collaboratorService.assignCardToUsers(cardName, usernames);
+    }
+
+    @POST
+    @Path("/moveCard/{cardName}/{sourceListName}/{targetListName}")
+    public Response moveCard(
+            @PathParam("cardName") String cardName,
+            @PathParam("sourceListName") String sourceListName,
+            @PathParam("targetListName") String targetListName) {
+        return collaboratorService.moveCard(cardName, sourceListName, targetListName);
+    }
+}
+>>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad

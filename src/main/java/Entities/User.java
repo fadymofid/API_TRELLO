@@ -3,13 +3,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.*;
-
+import Entities.Role;
 @Entity
 @Table(name ="users")
 public class User {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     @Column(nullable = false)
@@ -27,14 +27,15 @@ public class User {
    
     @ManyToMany(mappedBy = "collaborators")
     private List<Board> collaboratedBoards = new ArrayList<>();
-  
+    
+    
 
     public User() {
     }
 
    
 
-    
+
     public Long getId() {
         return id;
     }
@@ -43,7 +44,6 @@ public class User {
         this.id = id;
     }
 
-   
     public String getUsername() {
         return username;
     }
@@ -60,7 +60,6 @@ public class User {
         this.email = email;
     }
 
-    
     public String getPassword() {
         return password;
     }

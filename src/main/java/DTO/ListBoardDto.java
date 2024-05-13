@@ -1,4 +1,4 @@
-package Service;
+package DTO;
 
 import Entities.ListType;
 

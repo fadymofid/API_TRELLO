@@ -1,13 +1,21 @@
 package Controller;
 import javax.ws.rs.*;
 import javax.ejb.Stateful;
+<<<<<<< HEAD
+=======
+import javax.ejb.Stateless;
+>>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import Entities.User;
 import Service.UserService;
 
+<<<<<<< HEAD
 @Stateful
+=======
+@Stateless
+>>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
 @Path("/Ucontrol")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -39,4 +47,8 @@ public class UserController {
         return userService.listUsers();
     }
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
