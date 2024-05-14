@@ -17,11 +17,6 @@ public class Task {
     private String name;
     private int storyPoints;
     private boolean completed;
-<<<<<<< HEAD
-    @ManyToOne
-    private Sprint sprint;
-=======
->>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
     public boolean isCompleted() {
         return completed;
     }
@@ -30,12 +25,8 @@ public class Task {
         this.completed = completed;
     }
 
-<<<<<<< HEAD
- 
-=======
     @ManyToOne
     private Sprint sprint;
->>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
 
     public Long getId() {
         return id;
@@ -45,10 +36,6 @@ public class Task {
         this.id = id;
     }
 
-<<<<<<< HEAD
-    
-=======
->>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
     public String getname() {
         return name;
     }

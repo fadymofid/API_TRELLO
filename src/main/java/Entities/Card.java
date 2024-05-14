@@ -2,11 +2,6 @@ package Entities;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
-<<<<<<< HEAD
-
-
-=======
->>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
 @Entity
 @Table(name = "cards")
 public class Card {
@@ -25,12 +20,8 @@ public class Card {
     
     @Column
     private String comments; 
-<<<<<<< HEAD
-    @ManyToOne(fetch = FetchType.EAGER)
-=======
 
     @ManyToOne(fetch = FetchType.EAGER) 
->>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
     @JoinColumn(name = "listboard_id", nullable = false)
     private ListBoard listboard;
     
@@ -52,11 +43,7 @@ public class Card {
     }
 
 
-<<<<<<< HEAD
-    
-=======
   
->>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
     public String getDescription() {
         return description;
     }

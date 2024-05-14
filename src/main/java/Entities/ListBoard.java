@@ -35,10 +35,6 @@ public class ListBoard {
         this.listType = listType.TODO;
     }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> aa476ec8eee61aceacd684d97b8698580fa760ad
 
     public Long getId() {
         return id;

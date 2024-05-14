@@ -1,4 +1,5 @@
-/Entities/
-/Service/
-/DTO/
 /Controller/
+/DTO/
+/Entities/
+/Message/
+/Service/
